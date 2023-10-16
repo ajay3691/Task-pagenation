@@ -28,7 +28,7 @@ function CreateProd() {
       // Check file type
       if (selectedFile.type === 'image/jpeg' || selectedFile.type === 'image/png') {
         // Check file size (max 2MB)
-        if (selectedFile.size <= 0 * 0 * 0) {
+        if (selectedFile.size <= 2 * 1024 * 1024) {
           // Create a FileReader to read the selected image
           const reader = new FileReader();
 

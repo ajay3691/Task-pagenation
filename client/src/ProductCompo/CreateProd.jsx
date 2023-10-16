@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
 import axios from 'axios';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function CreateProd() {
   const [product, setProduct] = useState({
     name: '',
-    code: '', // Add 'code' to your state
-    category: '', // Add 'category' to your state
-    image: null, // Modify 'image' to accept a file
+    code: '',
+    category: '',
+    image: null,
     description: '',
+  });
+  const [alerts, setAlerts] = useState({
+    imageSizeAlert: false,
+    imageFormatAlert: false,
+    requiredFieldsAlert: false,
   });
   const navigate = useNavigate();
 
@@ -18,22 +23,22 @@ function CreateProd() {
 
   const fileChangeHandler = (event) => {
     const selectedFile = event.target.files[0];
-  
+
     if (selectedFile) {
       // Check file type
       if (selectedFile.type === 'image/jpeg' || selectedFile.type === 'image/png') {
         // Check file size (max 2MB)
-        if (selectedFile.size <= 2 * 1024 * 1024) {
+        if (selectedFile.size <= 0 * 0 * 0) {
           // Create a FileReader to read the selected image
           const reader = new FileReader();
-  
+
           // Listen for the load event when the reader is done
           reader.onload = () => {
             const imageDataUrl = reader.result;
             console.log('Image data URL:', imageDataUrl);
             setProduct({ ...product, image: imageDataUrl });
           };
-  
+
           // Read the selected image as a data URL
           reader.readAsDataURL(selectedFile);
         } else {
@@ -43,40 +48,39 @@ function CreateProd() {
         alert('Invalid image format. Please select a JPEG or PNG image.');
       }
     }
-  };  
-  
- /*  const fileChangeHandler=(event)=>{
-    let imageFile=event.target.files[0]
-    let reader=new FileReader()
-    reader.readAsDataURL(imageFile)
-    reader.addEventListener('load',()=>{
-      if(reader.result){
-        setProduct({...product,image:reader.result})
-      }
-      else{
-        alert('Error Occurred')
-      }
-    })
-  } */
-  
+  };
+
+  const clearAlerts = () => {
+    setAlerts({
+      imageSizeAlert: false,
+      imageFormatAlert: false,
+      requiredFieldsAlert: false,
+    });
+  };
+
+  const validateForm = () => {
+    clearAlerts();
+    if (!product.name || !product.code || !product.category || !product.image) {
+      setAlerts({ ...alerts, requiredFieldsAlert: true });
+      return false;
+    }
+    return true;
+  };
+
   const submitHandler = (event) => {
     event.preventDefault();
-   /*  const formData = new FormData();
-    formData.append('name', product.name);
-    formData.append('code', product.code);
-    formData.append('category', product.category);
-    formData.append('image', product.image);
-    formData.append('description', product.description); */
 
-    axios
-      .post('http://localhost:5000/api/product', product)
-      .then((resp) => {
-        navigate('/admin');
-      })
-      .catch((error) => {
-        console.error(error);
-        alert('Failed to add product. Please try again.');
-      });
+    if (validateForm()) {
+      axios
+        .post('http://localhost:5000/api/product', product)
+        .then((resp) => {
+          navigate('/admin');
+        })
+        .catch((error) => {
+          console.error(error);
+          alert('Failed to add a product. Please try again.');
+        });
+    }
   };
 
   return (
@@ -84,11 +88,11 @@ function CreateProd() {
       <div className="row">
         <div className="col">
           <div className="d-flex vh-100 bg-danger justify-content-center align-items-center">
-            <div className='w-50 bg-white rounded p-3'>
+            <div className="w-50 bg-white rounded p-3">
               <form>
-                <h2> Add Product</h2>
+                <h2>Add Product</h2>
                 <div className="mb-2">
-                  <label htmlFor="name"> Product Name</label>
+                  <label htmlFor="name">Product Name</label>
                   <input
                     type="text"
                     onChange={updateHandler}
@@ -98,7 +102,7 @@ function CreateProd() {
                   />
                 </div>
                 <div className="mb-2">
-                  <label htmlFor="code"> Code</label>
+                  <label htmlFor="code">Code</label>
                   <input
                     type="text"
                     onChange={updateHandler}
@@ -108,21 +112,16 @@ function CreateProd() {
                   />
                 </div>
                 <div className="mb-2">
-                  <label htmlFor="category"> Category</label>
-                  <select
-                    onChange={updateHandler}
-                    name="category"
-                    className="form-control"
-                  >
+                  <label htmlFor="category">Category</label>
+                  <select onChange={updateHandler} name="category" className="form-control">
                     <option value="">Select Category</option>
                     <option value="Category1">Category 1</option>
                     <option value="Category2">Category 2</option>
-                    {/* Add more category options here */}
+                    <option value="Category2">Category 3</option>
                   </select>
                 </div>
-             
                 <div className="mb-2">
-                  <label htmlFor="image"> Image (PNG/JPEG, max 2MB)</label>
+                  <label htmlFor="image">Image (PNG/JPEG, max 2MB)</label>
                   <input
                     type="file"
                     accept=".png, .jpg, .jpeg"
@@ -131,8 +130,30 @@ function CreateProd() {
                     className="form-control"
                   />
                 </div>
+                {alerts.requiredFieldsAlert && (
+                  <div className="alert alert-danger" role="alert">
+                    Please fill in all required fields.
+                  </div>
+                )}
+                {alerts.imageSizeAlert && (
+                  <div className="alert alert-danger" role="alert">
+                    Image size exceeds 2MB. Please choose a smaller image.
+                  </div>
+                )}
+                {alerts.imageFormatAlert && (
+                  <div className="alert alert-danger" role="alert">
+                    Invalid image format. Please select a JPEG or PNG image.
+                  </div>
+                )}
+                {product.image && (
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    style={{ width: '100%', height: '200px', objectFit: 'cover' }}
+                  />
+                )}
                 <div className="mb-2">
-                  <label htmlFor="description"> Description</label>
+                  <label htmlFor="description">Description</label>
                   <input
                     type="text"
                     onChange={updateHandler}
@@ -141,7 +162,9 @@ function CreateProd() {
                     className="form-control"
                   />
                 </div>
-                <button className="btn btn-success" onClick={submitHandler}>Submit</button>
+                <button className="btn btn-success" onClick={submitHandler}>
+                  Submit
+                </button>
               </form>
             </div>
           </div>

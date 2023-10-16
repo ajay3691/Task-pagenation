@@ -22,7 +22,7 @@ function UpdateProd() {
 
     if (selectedFile) {
       if (selectedFile.type === 'image/jpeg' || selectedFile.type === 'image/png') {
-        if (selectedFile.size <= 2 * 1024 * 1024) {
+        if (selectedFile.size <= 0 * 0 * 0) {
           const reader = new FileReader();
 
           reader.onload = () => {

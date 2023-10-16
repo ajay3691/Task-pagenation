@@ -71,6 +71,7 @@ function Admin() {
                           src={p.image}
                           alt={p.name}
                           className="card-img-top"
+                         style={{ width: '100%', height: '200px', objectFit: 'cover' }} /* Set a fixed width and height */
                         />
                         <div className="card-body">
                           <h5 className="card-title">{p.name}</h5>
